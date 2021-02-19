@@ -1,0 +1,107 @@
+---
+title: "shinyapp"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{shinyapp}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(MATH4793MOSER)
+```
+
+# Introduction
+
+The shiny app in this package can allow for a user ot upload their own dataset and explore it with two plots and some automatic calculations. This document will explain specifically the apps functionality and the statistical theory behind it.
+
+The app is called by the function MATH4793MOSER::firstshinyapp()
+
+# Functionality of the Shiny App
+
+## Upload Data
+
+The shiny app requires the user to uplod their own data as a .csv file. Once uploaded, the app will populate the dashboard using the uploaded data with the first column of the dataset used as the default selection across inputs.
+
+## Inputs
+
+There are four inputs that allow the user to manipulate the plots and calculations. The first two allow the user to designate the X and Y variables for the two scatter plots. The third selection scales the size of each plotted point to the selected variable. The fourth input adjusts the color of the points in relation to the selected variable.
+
+The final is an angle in radians to determine the angle of rotation of the axis in the second plot.
+
+The top plot can also be clicked to calcualte the drop-one correlation with the selected varibales. Clicking on the plot on not a point will return the correlation coefficient using all points.
+
+## Plots
+
+### First Plot
+
+The first plot is a scatterplot that displays the two varibales selected with colors and size manipulated by other variables in the dataset.
+
+Beneath the plot, the drop-one correlation coefficient is calculated and displayed beneath the graph.
+
+### Second Plot
+
+The second plot explores how an axis rotation changes the plot. The slider input for the rotation angle will prompt the graph to show the rotated axis. Worth noting is that because the range of the axes take on different values to best present the data, the rotated axes will not look perpendicular as they rotate. Nevertheless, it provides a helpful visual to see how the rotation affects the rotated covariance between the variables that is displayed below the graph. Finally, the first quandrant angle that zeroes the covariance is displayed beneath the graph.
+
+# Theory
+
+This Shiny application showcases statistcal theory related to rotations of data or axes.
+
+## Background and Motivation
+
+Rotating a data cloud, either by applying a rotational transformation to the data itself or the coordinate plane, allows one to create descriptive statistics in this different paradigm. It also creates rotated variables (often denoted with a tilde) that can be more succinct in capturing important information about a pair or group of variables than is possible in their non-rotated format.
+
+## Formulae
+
+The matrix equation to rotate two variables is as follows:
+
+$$
+\begin{bmatrix}
+\tilde{x_1}\\
+\tilde{x_2}
+\end{bmatrix} =
+\begin{bmatrix}
+\cos{\theta} & \sin{\theta} \\
+-\sin{\theta} & \cos{\theta}
+\end{bmatrix} \begin{bmatrix}
+x_1 \\ x_2
+\end{bmatrix}
+$$
+The angle $\theta$ given in radians is the angle of rotation.
+
+These modified variables can be used to calculate rotated statistical quantities based on analagous nonrotated values.
+
+For instance, the rotated covariance $\tilde s_{12}$ can be written in terms of the non-rotated variances and covariances with the following expression:
+
+$$
+\tilde s_{12} = (s_{22}-s_{11})\cos{\theta}\sin{\theta}+s_{12}(\cos^2{\theta}-\sin^2{\theta})
+$$
+
+This expression can be rearranged to analytically determine values of $\theta$ that zero the covariance of the two variables. In this Shiny app, the function uniroot() is used to determine the root computationally.
+
+The enitre derivation will not be written out here but it begins with definition of the covariance between the two rotated variables:
+
+$$
+n\tilde s_{12}=\sum^n_{j=1}{(\tilde x_{j1} - \tilde x_{j,avg})(\tilde x_{21}- \tilde x_{j,avg})}
+$$
+And idenfifyint the following relationship between the rotated averages to the nonrotated averages:
+
+$$
+\begin{bmatrix}
+\tilde x_{1,avg}\\
+\tilde x_{2,avg}
+\end{bmatrix} =
+\begin{bmatrix}
+\cos{\theta} & \sin{\theta} \\
+-\sin{\theta} & \cos{\theta}
+\end{bmatrix} \begin{bmatrix}
+\overline x_1 \\ \overline x_2
+\end{bmatrix}
+$$
