@@ -30,6 +30,7 @@ hotellingsttest <- function(data, mu, alpha){
     stop("Alpha must be a numeric value between 0 and 1")
   }
 
+
   ## Calculation of relevant quantities
 
   means <- colMeans(data)
@@ -38,13 +39,9 @@ hotellingsttest <- function(data, mu, alpha){
   n <- length(data[,1])
   p <- length(data[1,])
 
-  Tsq <- n * (t(means)-t(mu))%*%Sinv%*%(means-mu)
+  Tsq <- n*(t(means)-t(mu))%*%Sinv%*%(means-mu)
 
-  f <- p*(n-1)/(n-p)*qf(alpha,p,n-p)
-
-  b <- 1- alpha
-
-  percent <- 100 * b
+  f <- p*(n-1)/(n-p)*qf(alpha,p,(n-p),lower.tail = FALSE)
 
   outcome <- ""
 
@@ -58,8 +55,8 @@ hotellingsttest <- function(data, mu, alpha){
 
   eigenS <- eigen(S)
 
-  halflength1 <- eigenS$values[1]^0.5 * f^0.5
-  halflength2 <- eigenS$values[2]^0.5 * f^0.5
+  halflength1 <- eigenS$values[1]^0.5 * (f/n)^0.5
+  halflength2 <- eigenS$values[2]^0.5 * (f/n)^0.5
 
   majorhalflength <- max(halflength1,halflength2)
   minorhalflength <- min(halflength1,halflength2)
@@ -91,10 +88,10 @@ hotellingsttest <- function(data, mu, alpha){
     geom_label(aes(label = "Mean X2", x = 0, y = mean2)) +
     geom_segment(aes(x = mean1 - eigenS$vectors[1,1] * halflength1, y = mean2 - eigenS$vectors[2,1]*halflength1, xend = mean1 + eigenS$vectors[1,1] * halflength1 , yend = mean2 + eigenS$vectors[2,1]*halflength1)) +
     geom_segment(aes(x = mean1 - eigenS$vectors[1,2] * halflength2, y = mean2 - eigenS$vectors[2,2]*halflength2, xend = mean1 + eigenS$vectors[1,2] * halflength2 , yend = mean2 + eigenS$vectors[2,2]*halflength2))
-  g
 
   ## List output
 
-  list(TestResult = outcome, QuadraticSize = Tsq, ScaledQuantile = f, Eigenvectors = eigenS$vectors, Eigenvalues = eigenS$values,
-       HalfMajorAxisLength = majorhalflength, HalfMinorAxisLength = minorhalflength, AxisRatio = axisratio)
+  list(TestResult = outcome, QuadraticSize = Tsq, SampleMeans = means, ScaledQuantile = f, Eigenvectors = eigenS$vectors, Eigenvalues = eigenS$values,
+       HalfMajorAxisLength = majorhalflength, HalfMinorAxisLength = minorhalflength, AxisRatio = axisratio, Plot = g)
+
 }
