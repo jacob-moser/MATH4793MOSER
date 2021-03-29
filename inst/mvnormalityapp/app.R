@@ -16,15 +16,18 @@ ui <- fluidPage(
                 accept = ".csv"),
       uiOutput("var1"),
       uiOutput("var2"),
-      uiOutput("var3")
+      uiOutput("var3"),
+      uiOutput("var4"),
+      sliderInput("alpha", "alpha value to draw confidence ellipse around points being checked for bivariate normality", min = 0, max = 1, value = 0.05, step = 0.01)
     ),
 
     mainPanel(
       tableOutput("proportiontest"),
-      tableOutput("violinProp"),
+      plotOutput("violinProp"),
       plotOutput("normqq"),
       plotOutput("chisqplot"),
-      textOutput("bivariatenormcheck")
+      textOutput("bivariatenormcheck"),
+      plotOutput("confidenceellipse")
     )
   )
 )
@@ -45,15 +48,39 @@ server <- function(input, output) {
 
   # Render violin plot showing univariate distribution and standard deviation ranges
 
-  output$violinvar <- renderUI({
-    varSelectInput("violvar", "Variable for the Violin Plot",data())
-  })
+  output$violinProp <- renderPlot({
+    data <- data()
+    dat <- data
+    a <- vector()
+    for(i in 1:length(dat[1,])){
+      a <- c(a,dat[,i])
+    }
 
-  output$violinProp <- renderTable({
-    dat <- data()
-    data <- data.frame(dat[1,])
+    b <- vector()
+    for(i in 1:length(dat[1,])){
+      b <-c(b,rep(names(dat)[i],length(dat[,1])))
+    }
 
-    data
+    d <- vector()
+    for(j in 1:length(dat[1,])){
+      for(i in 1:length(dat[,1])){
+        if(abs(dat[i,j]-mean(dat[,j])) <= var(dat[,j])^0.5){
+          d <- c(d, "Within 1 Standard Deviation of Mean")
+        }
+        if(abs(dat[i,j]-mean(dat[,j])) <= 2 * var(dat[,j])^0.5 & abs(dat[i,j]-mean(dat[,j])) > var(dat[,j])^0.5){
+          d <- c(d, "Within 2 Standard Deviations of Mean")
+        }
+        if(abs(dat[i,j]-mean(dat[,j])) > 2 * var(dat[,j])^0.5){
+          d <- c(d, "Greater Than 2 Standard Deviations Away from Mean")
+        }
+      }
+    }
+
+    use <- data.frame(matrix(c(a,b,d), nrow = length(a), ncol = 3))
+
+    g <- ggplot(use, mapping = aes(x = X2, y = as.numeric(as.character(X1)))) + geom_violin() + geom_point(aes(color = X3)) +
+      xlab("Variable") + ylab("Value")
+    g
   })
 
   ## Renders Chi Squared QQ Plot for data set... consider moving to an independent function?
@@ -108,6 +135,38 @@ server <- function(input, output) {
   output$bivariatenormcheck <- renderPrint({
     dat <- data()
     bivariatenormcheck(dat[,toString(input$var1)],dat[,toString(input$var2)])
+  })
+
+  ## Output p-values and rq values for each variable
+
+  output$pvalsandrq <- renderTable({
+    dat <- data()
+    rq(dat[,1])$coeff
+
+  })
+
+  ## Confidence ellipse for the variables being checked for bivariate normality
+
+  output$confidenceellipse <- renderPlot({
+    dat <- data()
+    use <- matrix(c(dat[,toString(input$var1)],dat[,toString(input$var2)]), nrow = length(dat[,toString(input$var1)]), ncol = 2)
+
+    xbar <- matrix(colMeans(use), nrow = 2, ncol = 1)
+    S <- cov(use)
+    chiquant <- qchisq(1-input$alpha,2)
+
+    use2 <- data.frame(use)
+    use2$X1 <- as.numeric(as.character(use2$X1))
+    use2$X2 <- as.numeric(as.character(use2$X2))
+
+    library(ggplot2)
+    library(ggforce)
+
+    e <- eigen(S)
+
+    g <- ggplot(use2, aes(x = X1, y = X2)) + geom_point() + ggtitle("Confidence Ellipse") + xlab("First Variable") + ylab("Second Variable")
+    g <- g + geom_ellipse(aes(x0 = xbar[1,1], y0 = xbar[2,1], a = (e$values[1]*chiquant)^0.5, b = (e$values[2]*chiquant)^0.5, angle = atan(e$vectors[2,1]/e$vectors[1,1])))
+    g
   })
 
 }

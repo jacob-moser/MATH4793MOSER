@@ -32,5 +32,5 @@ The plot shows the confidence ellipse with lines marking the mean values and the
 }
 
 \examples{
-hotellingsttest(data = matrix(c(1,2,3,4,5,6),nrow=3,ncol=2), mu = matrix(c(1,2),nrow=2, ncol=1), alpha=0.05)
+hotellingsttest(data = matrix(c(49,51,73,84,85,62),nrow=3,ncol=2), mu = matrix(c(1,2),nrow=2, ncol=1), alpha=0.05)
 }
