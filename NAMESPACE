@@ -3,6 +3,7 @@
 export(bivariatenormcheck)
 export(firstshinyapp)
 export(hotellingsttest)
+export(mvnormalityapp)
 export(myfirstfun)
 export(proportionnormaltest)
 export(rq)

@@ -7,14 +7,14 @@
 univariateqq(x)
 }
 \value{
-List ouput containing the proportions and output signalling whether the proportion is in the expected range for a normal variable or not
+List ouput containing the quantiles and sorted data
 }
 \description{
-Checks the univariate normality for each column of a data matrix based on the expected proporiton of observations falling within 1 and 2 standard deviations of the mean
+Produces the quantiles and sorted data to produce a standard normal QQ plot for a single variable
 }
 \details{
-User provides a multivariate data set and the function produces a list output calculating the propotion of data for each individual variable within one and two standard deviations. This is checked against the theoretical expectations of 0.638 and 0.954 within the theoretically expected range for the sampling distribution of the proportion
+User provides data as a vector and the quantiles and sorted data are returned
 }
 \examples{
-proportionnormaltest(data = matrix(c(2,4,3,7,9,1,3,5,6), nrow = 3, ncol =3))
+univariateqq(x = c(2,4,3,7,9,1,3,5,6))
 }
