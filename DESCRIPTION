@@ -4,7 +4,7 @@ Title: Math 4793 R Functions
 Version: 0.1.0
 Author: Jacob Moser
 Maintainer: Jacob Moser <jacob.moser@ou.edu>
-Description: This contains R functions and documentation for projects.
+Description: This contains R functions and documentation for projects and work related to MATH4793.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

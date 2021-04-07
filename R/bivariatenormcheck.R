@@ -28,6 +28,7 @@ bivariatenormcheck <- function(x1,x2){
     }
   }
 
-  percentin = count/length(x1)
-  list(Outcome = cat(percentin," <- proportion of data falling within expected 50% contour in the Bivariate Normality Check",""))
+  percentin = round(count/length(x1),5)
+  text = paste(toString(percentin), " <- proportion of data falling within expected 50% contour in the Bivariate Normality Check")
+  list(Outcome = text)
 }

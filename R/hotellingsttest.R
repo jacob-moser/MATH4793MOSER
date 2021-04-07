@@ -21,7 +21,7 @@
 #' @export
 #'
 #' @examples
-#' hotellingsttest(data = matrix(c(49,51,73,84,85,62),nrow=3,ncol=2), mu = matrix(c(1,2),nrow=2, ncol=1), alpha=0.05)
+#' \dontrun{ hotellingsttest(data = matrix(c(49,51,73,85,33,26),nrow=3,ncol=2),mu = matrix(c(1,2),nrow=2,ncol=1),alpha=0.05)}
 hotellingsttest <- function(data, mu, alpha){
 
   ## Conditional stop for inappropriate alpha
@@ -74,20 +74,17 @@ hotellingsttest <- function(data, mu, alpha){
 
   ## Plot
 
-  library(ggplot2)
-  library(ggforce)
-
-  g <- ggplot() + labs(x = "X1", y = "X2", title = "Confidence Ellipse")
+  g <- ggplot2::ggplot() + ggplot2::labs(x = "X1", y = "X2", title = "Confidence Ellipse")
 
   ## Produce plot of ellipse
 
-  g <- g + geom_ellipse(aes(x0 = mean1, y0 = mean2, a = halflength1, b = halflength2, angle = ang)) +
-    geom_segment(aes(x=0,xend = mean1,y=mean2,yend=mean2)) +
-    geom_segment(aes(x=mean1,xend=mean1,y=mean2,yend=0)) +
-    geom_label(aes(label = "Mean X1", x = mean1, y = 0)) +
-    geom_label(aes(label = "Mean X2", x = 0, y = mean2)) +
-    geom_segment(aes(x = mean1 - eigenS$vectors[1,1] * halflength1, y = mean2 - eigenS$vectors[2,1]*halflength1, xend = mean1 + eigenS$vectors[1,1] * halflength1 , yend = mean2 + eigenS$vectors[2,1]*halflength1)) +
-    geom_segment(aes(x = mean1 - eigenS$vectors[1,2] * halflength2, y = mean2 - eigenS$vectors[2,2]*halflength2, xend = mean1 + eigenS$vectors[1,2] * halflength2 , yend = mean2 + eigenS$vectors[2,2]*halflength2))
+  g <- g + ggforce::geom_ellipse(ggplot2::aes(x0 = mean1, y0 = mean2, a = halflength1, b = halflength2, angle = ang)) +
+    ggplot2::geom_segment(ggplot2::aes(x=0,xend = mean1,y=mean2,yend=mean2)) +
+    ggplot2::geom_segment(ggplot2::aes(x=mean1,xend=mean1,y=mean2,yend=0)) +
+    ggplot2::geom_label(ggplot2::aes(label = "Mean X1", x = mean1, y = 0)) +
+    ggplot2::geom_label(ggplot2::aes(label = "Mean X2", x = 0, y = mean2)) +
+    ggplot2::geom_segment(ggplot2::aes(x = mean1 - eigenS$vectors[1,1] * halflength1, y = mean2 - eigenS$vectors[2,1]*halflength1, xend = mean1 + eigenS$vectors[1,1] * halflength1 , yend = mean2 + eigenS$vectors[2,1]*halflength1)) +
+    ggplot2::geom_segment(ggplot2::aes(x = mean1 - eigenS$vectors[1,2] * halflength2, y = mean2 - eigenS$vectors[2,2]*halflength2, xend = mean1 + eigenS$vectors[1,2] * halflength2 , yend = mean2 + eigenS$vectors[2,2]*halflength2))
 
   ## List output
 

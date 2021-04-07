@@ -1,0 +1,254 @@
+---
+title: "Project 1"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{project1}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(MATH4793MOSER)
+```
+
+## Read in Data
+
+```{r}
+welder <- MATH4793MOSER::welder
+head(welder)
+```
+## Normality Checks
+
+### Before Suggested Log Transformation
+
+#### Univariate Checks
+
+For each variable, I will create univariate QQ plots to assess normality. I will also use the Shapiro-Wilk test to supplement these QQ plots.
+
+```{r}
+voltageqq <- MATH4793MOSER::univariateqq(welder$voltage)
+plot(voltageqq$TheoreticalQuantiles,voltageqq$Data)
+
+currentqq <- MATH4793MOSER::univariateqq(welder$current)
+plot(currentqq$TheoreticalQuantiles,currentqq$Data)
+
+feedspeedqq <- MATH4793MOSER::univariateqq(welder$feedspeed)
+plot(feedspeedqq$TheoreticalQuantiles,feedspeedqq$Data)
+
+gasflowqq <- MATH4793MOSER::univariateqq(welder$gasflow)
+plot(gasflowqq$TheoreticalQuantiles,gasflowqq$Data)
+
+s20x::normcheck(welder$voltage)
+s20x::normcheck(welder$current)
+s20x::normcheck(welder$feedspeed)
+s20x::normcheck(welder$gasflow)
+```
+
+Based on the above output, it is appropriate to assume normality for each of the variables except gas flow. The textbook suggests a log transformation for gas flow which is consistent with these findings. Below, we will also perform bivariate normality and chi-squared multivariate normality check. It is reasonable to assume that bivariate checks involving gas flow will suggest non-normality and that the chi-squared QQ plot may also not reflect that the dataset is normal because of the gas flow variable.
+
+#### Bivariate Checks
+
+I use my packages bivariate normality check to check bivariate normality for each pair of variables:
+
+```{r}
+
+MATH4793MOSER::bivariatenormcheck(welder$voltage,welder$current)
+MATH4793MOSER::bivariatenormcheck(welder$voltage,welder$feedspeed)
+MATH4793MOSER::bivariatenormcheck(welder$voltage,welder$gasflow)
+MATH4793MOSER::bivariatenormcheck(welder$current,welder$feedspeed)
+MATH4793MOSER::bivariatenormcheck(welder$current,welder$gasflow)
+MATH4793MOSER::bivariatenormcheck(welder$feedspeed,welder$gasflow)
+  
+```
+
+As expected, the bivariate normality checks involving gas flow have proportions that depart somewhat notably from the expected proportion of 0.5. Across the board, bivariate normality seems an appropriate assumption for the expected 50% contours
+
+#### Chi-Squared QQ-Plot
+
+We create a chi-squared QQ plot to assess normality aggregate across all four varaibles:
+
+```{r}
+
+## Create chisquaredqq function for R package :-)
+
+chisquaredqq <- function(data){
+
+    xbar <- matrix(colMeans(data), nrow = length(data[1,]), ncol = 1)
+    S <- cov(data)
+    Sinv <- solve(S)
+    d <- matrix(nrow = length(data[,1]), ncol = 1)
+    for(i in 1:length(data[,1])){
+      d[i,1] = t(t(data[i,])-xbar)%*%Sinv%*%(t(data[i,])-xbar)
+    }
+    d <- sort(d)
+    chivals <- matrix(nrow = length(data[,1]),ncol = 1)
+    for(i in 1: length(data[,1])){
+      chivals[i,1] = qchisq((i-0.5)/length(data[,1]),df=3)
+    }
+    list(TheoQuants = chivals, CompQuants = d)
+}
+
+chiqq <- chisquaredqq(welder)
+
+    plot(chiqq$TheoQuants, chiqq$CompQuants, main = "Chi-Squared QQ Plot", xlab = "Theoretical Quantiles", ylab = "Computed Quantiles")
+    ```
+
+The chi-squared plot appears mostly linear, suggesting normality across the data set.
+
+#### Conclusions
+
+As mentioned, the normality checks applied (univariateqq, bivariate normal, and a chi-squared qq plot) suggest it would be reasonable to assume the varaibles are distributed normally. Only the gas flow variable may need further attention. It's univariate qq plot was the least linear and bivaraite nromal checks involving it departed the most notably from the expected 50% proportion of data. For these reasons, we will apply a natural log transformation to that variable specifically.
+
+### After Suggested Log Transformation
+
+#### Transforming the Data
+
+Here, we apply the logarithmic transformation to the gas flow variable and perform the same normality checks to assure that the transformation makes the gas flow variable more normal than it was prior.
+
+```{r}
+welder$gasflow <- log(welder$gasflow)
+head(welder)
+```
+
+
+#### Univariate Checks
+
+```{r}
+voltageqq <- MATH4793MOSER::univariateqq(welder$voltage)
+plot(voltageqq$TheoreticalQuantiles,voltageqq$Data)
+
+currentqq <- MATH4793MOSER::univariateqq(welder$current)
+plot(currentqq$TheoreticalQuantiles,currentqq$Data)
+
+feedspeedqq <- MATH4793MOSER::univariateqq(welder$feedspeed)
+plot(feedspeedqq$TheoreticalQuantiles,feedspeedqq$Data)
+
+gasflowqq <- MATH4793MOSER::univariateqq(welder$gasflow)
+plot(gasflowqq$TheoreticalQuantiles,gasflowqq$Data)
+
+s20x::normcheck(welder$voltage)
+s20x::normcheck(welder$current)
+s20x::normcheck(welder$feedspeed)
+s20x::normcheck(welder$gasflow)
+```
+
+
+#### Bivariate Checks
+
+```{r}
+MATH4793MOSER::bivariatenormcheck(welder$voltage,welder$current)
+MATH4793MOSER::bivariatenormcheck(welder$voltage,welder$feedspeed)
+MATH4793MOSER::bivariatenormcheck(welder$voltage,welder$gasflow)
+MATH4793MOSER::bivariatenormcheck(welder$current,welder$feedspeed)
+MATH4793MOSER::bivariatenormcheck(welder$current,welder$gasflow)
+MATH4793MOSER::bivariatenormcheck(welder$feedspeed,welder$gasflow)
+```
+
+
+#### Chi-Squared QQ-Plot
+
+```{r}
+chiqq <- chisquaredqq(welder)
+
+    plot(chiqq$TheoQuants, chiqq$CompQuants, main = "Chi-Squared QQ Plot", xlab = "Theoretical Quantiles", ylab = "Computed Quantiles")
+```
+
+
+#### Conclusions
+
+We can see that the logarithmic transformation did bring the gas flow varaible's distribution closer to normal (as seen in the univariate checks) and in making the chi-squared QQ plot for the entire data closer to straight. This implies the transformation does indeed help us better assume normality conditions.
+
+## T Squared Chart
+
+```{r}
+tsquaredchart <- function(data){
+  obsnum <- 1:length(data[,1])
+  xbar <- as.numeric(matrix(colMeans(data)))
+  S <- cov(data)
+  Sinv <- solve(S)
+  
+  tsquared <- vector()
+  
+  for(i in 1:length(data[,1])){
+    d <- t(as.numeric(matrix(data[i,])) - xbar) %*% Sinv %*% (as.numeric(matrix(data[i,]))-xbar)
+    tsquared <- c(tsquared,d)
+  }
+  
+  use <- matrix(c(obsnum,tsquared), ncol = 2)
+  use <- data.frame(use)
+  
+  g <- ggplot2::ggplot(use, ggplot2::aes(x = X1, y = X2)) + ggplot2::geom_point() + ggplot2::xlab("Observation Number") + 
+    ggplot2::ylab("T-Squared Value") + ggplot2::ggtitle("T-Squared Chart") + ggplot2::geom_hline(ggplot2::aes(yintercept = qchisq(0.95,length(data[1,])))) +          ggplot2::geom_hline(ggplot2::aes(yintercept = qchisq(0.99,length(data[1,])))) + 
+    ggplot2::geom_label(ggplot2::aes(x = 2, y = qchisq(0.95,length(data[1,])), label = "95% Limit")) +
+    ggplot2::geom_label(ggplot2::aes(x = 2, y = qchisq(0.99,length(data[1,])), label = "99% Limit"))
+  
+  list(Plot = g)
+  
+}
+
+tsquaredchart(welder)$Plot
+
+## consider allowing user to define control limits...
+
+```
+
+
+## Quality Control Ellipse
+
+Here I recreate figure 5.10 using a function that can generate a generic confidence ellipse for a given confidence level.
+
+```{r}
+confidenceellipse <- function(x1,x2,alpha){
+  use <- matrix(c(x1,x2), nrow = length(x1), ncol = 2)
+  xbar <- matrix(colMeans(use), nrow = 2, ncol = 1)
+  S <- cov(use)
+  Sinv <- solve(S)
+  chiquant <- qchisq(1-alpha,2)
+  e <- eigen(S)
+  use2 <- data.frame(use)
+  
+  g <- ggplot2::ggplot(use2, ggplot2::aes(x = X1, y = X2)) + ggplot2::geom_point() + ggplot2::ggtitle("Confidence Ellipse") + ggplot2::xlab("First Variable") + ggplot2::ylab("Second Variable")
+    g <- g + ggforce::geom_ellipse(ggplot2::aes(x0 = xbar[1,1], y0 = xbar[2,1], a = (e$values[1]*chiquant)^0.5, b = (e$values[2]*chiquant)^0.5, angle = atan(e$vectors[2,1]/e$vectors[1,1])))
+    list(Plot = g)
+}
+
+fig5.10 <- confidenceellipse(welder$voltage,welder$gasflow,0.01)
+
+fig5.10$Plot
+
+```
+
+
+## Univariate X Bar Charts
+
+```{r}
+univariatexbarchart <- function(x) {
+  obsnumber <- 1:length(x)
+  use <- data.frame(matrix(c(obsnumber,x), ncol = 2))
+  
+  mean <- mean(x)
+  UCL <- mean(x) + 3 * var(x)^0.5
+  LCL <- mean(x) - 3 * var(x)^0.5
+  
+  g <- ggplot2::ggplot(use, ggplot2::aes(x = X1, y = X2)) + ggplot2::geom_point() + ggplot2::geom_hline(ggplot2::aes(yintercept = mean)) +
+    ggplot2::geom_hline(ggplot2::aes(yintercept = UCL)) + ggplot2::geom_hline(ggplot2::aes(yintercept = LCL)) + ggplot2::geom_path() + 
+    ggplot2::xlab("Observation Number") + ggplot2::ylab("Observation Value") + ggplot2::ggtitle("Univariate Quality Control Chart") + 
+    ggplot2::geom_label(ggplot2::aes(x = 0, y = UCL, label = "UCL")) + ggplot2::geom_label(ggplot2::aes(x = 0, y = mean, label = "Mean")) + 
+    ggplot2::geom_label(ggplot2::aes(x = 0, y = LCL, label = "LCL"))
+  
+  list(Plot = g)
+}
+
+## Consider allowing for user defined CLs of some sort...
+
+univariatexbarchart(welder$gasflow)$Plot
+```
+
+
