@@ -89,9 +89,6 @@ As expected, the bivariate normality checks involving gas flow have proportions 
 We create a chi-squared QQ plot to assess normality aggregate across all four varaibles. In these plots, the quadratic statistical distance is calulcated for each variable, sorted, and plotted against theoretical chi-squared quantiles. Like the univariate QQ plots, approximate linearity suggests that the data set as a whole is comprised of normal variables.
 
 ```{r}
-
-## Create chisquaredqq function for R package :-)
-
 chiqq <- chisquaredqq(welder)
 
     plot(chiqq$TheoQuants, chiqq$CompQuants, main = "Chi-Squared QQ Plot", xlab = "Theoretical Quantiles", ylab = "Computed Quantiles")

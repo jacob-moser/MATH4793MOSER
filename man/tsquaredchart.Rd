@@ -4,10 +4,14 @@
 \alias{tsquaredchart}
 \title{tsquaredchart}
 \usage{
-tsquaredchart(data)
+tsquaredchart(data, conflevel1 = 0.95, conflevel2 = 0.99)
 }
 \arguments{
 \item{data}{the data set to create the plot for}
+
+\item{conflevel1}{first confidence level for the chart. Decimal represents percentage NOT alpha level}
+
+\item{conflevel2}{second confidence level for the chart. Decimal representes percentage NOT alpha level}
 }
 \value{
 A ggplot object containing the plot
