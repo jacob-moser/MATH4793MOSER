@@ -6,6 +6,9 @@
 \usage{
 rq(x)
 }
+\arguments{
+\item{x}{the vector of data to calculate rq for}
+}
 \value{
 List ouput containing the rq value
 }

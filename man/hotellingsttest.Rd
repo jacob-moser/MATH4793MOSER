@@ -6,6 +6,13 @@
 \usage{
 hotellingsttest(data, mu, alpha)
 }
+\arguments{
+\item{data}{the data set to conduct the test on}
+
+\item{mu}{the estimated mean vector}
+
+\item{alpha}{the confidence level for the T test}
+}
 \value{
 List output of calculations from Hotelling's T Test and a plot of the confidence ellipse plot
 }

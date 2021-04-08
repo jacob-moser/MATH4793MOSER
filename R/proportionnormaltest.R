@@ -4,6 +4,7 @@
 #'
 #' @details User provides a multivariate data set and the function produces a list output calculating the propotion of data for each individual variable within one and two standard deviations. This is checked against the theoretical expectations of 0.638 and 0.954 within the theoretically expected range for the sampling distribution of the proportion
 #'
+#' @param data data set to conduct the test on
 #'
 #' @return List ouput containing the proportions and output signalling whether the proportion is in the expected range for a normal variable or not
 #'

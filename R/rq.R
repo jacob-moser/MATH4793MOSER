@@ -3,6 +3,8 @@
 #' @description Calculates the correlation coefficient between sorted data and theoretical quantiles in a univariate QQ plot
 #' @details For a variable, univariateqq() is invoked to get quantiles, then the corelation coefficient is calculated
 #'
+#' @param x the vector of data to calculate rq for
+#'
 #' @return List ouput containing the rq value
 #'
 #' @export

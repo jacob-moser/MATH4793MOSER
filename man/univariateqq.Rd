@@ -6,6 +6,9 @@
 \usage{
 univariateqq(x)
 }
+\arguments{
+\item{x}{the data vector}
+}
 \value{
 List ouput containing the quantiles and sorted data
 }

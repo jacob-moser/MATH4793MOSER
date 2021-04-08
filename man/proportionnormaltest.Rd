@@ -6,6 +6,9 @@
 \usage{
 proportionnormaltest(data)
 }
+\arguments{
+\item{data}{data set to conduct the test on}
+}
 \value{
 List ouput containing the proportions and output signalling whether the proportion is in the expected range for a normal variable or not
 }

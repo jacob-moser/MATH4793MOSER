@@ -3,6 +3,10 @@
 #' @description Uses a bivariate normality check to calculate the proportion of bivariate data falling in an expected 50% confidence ellipse
 #' @details User provides two data vectors for function to check the pairs of data against 50% confidence ellipse
 #'
+#' @param x1 first data vector to conduct the check on
+#'
+#' @param x2 second data vector to conduct the check on
+#'
 #'
 #' @return Text output describing result of the test
 #'

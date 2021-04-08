@@ -3,6 +3,7 @@
 #' @description Produces the quantiles and sorted data to produce a standard normal QQ plot for a single variable
 #' @details User provides data as a vector and the quantiles and sorted data are returned
 #'
+#' @param x the data vector
 #'
 #' @return List ouput containing the quantiles and sorted data
 #' @export

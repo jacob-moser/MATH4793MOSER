@@ -10,7 +10,9 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 6
 )
 ```
 
@@ -18,7 +20,13 @@ knitr::opts_chunk$set(
 library(MATH4793MOSER)
 ```
 
+## Introduction
+
+This project reproduces results from example 5.11 in our textbook that seeks to demonstrate a case where one would need to do more analysis than just computing $T^2$ values to identify outlier observations in a data set.
+
 ## Read in Data
+
+The example data in question is related to certain measurements made on an automated process. There are 4 variables: voltage, current, feedspeed, and gas flow.
 
 ```{r}
 welder <- MATH4793MOSER::welder
@@ -26,11 +34,17 @@ head(welder)
 ```
 ## Normality Checks
 
+We must check the varaibles for approximate normality to be able to satisfy the conditions for the statistical tests and plots we will produce later. We will use univariate, bivariate, and chi-squared checks for normality. Other assumptions necessary are that there is not a time relation between the observations. We do not investigate that in-depth here, though the book mentions it is reasonable to assume that each observation is sufficiently independent over time.
+
 ### Before Suggested Log Transformation
+
+The book suggests a logarithmic transformation to the fourth variable, gas flow. We will perform normality checks on the data set both before and after this transformation.
 
 #### Univariate Checks
 
-For each variable, I will create univariate QQ plots to assess normality. I will also use the Shapiro-Wilk test to supplement these QQ plots.
+For each variable, we will create univariate QQ plots to assess normality. I will also use the Shapiro-Wilk test to supplement these QQ plots.
+
+A univariate QQ-plot plots the sorted data for a given variable against the anticipated, evenly-spaced quantiles from a normal distribution. If the variable is close to normal, this plot will be approximately linear. The R package s20x's Shapiro-Wilk test recreates these QQ-plots and also shows a histogram of the varaible against a normal distribution. These QQ plots verify the accuracy of those created by my package.
 
 ```{r}
 voltageqq <- MATH4793MOSER::univariateqq(welder$voltage)
@@ -55,7 +69,7 @@ Based on the above output, it is appropriate to assume normality for each of the
 
 #### Bivariate Checks
 
-I use my packages bivariate normality check to check bivariate normality for each pair of variables:
+I use my packages bivariate normality check to check bivariate normality for each pair of variables. This bivariate normality checks calculates the proportion of the observations falling within the anticipated 50% confidence region (based on the bivariate normal distribution) if the two variables were bivariate normal. Proportions straying from 0.5 do not support bivariate normality.
 
 ```{r}
 
@@ -68,32 +82,15 @@ MATH4793MOSER::bivariatenormcheck(welder$feedspeed,welder$gasflow)
   
 ```
 
-As expected, the bivariate normality checks involving gas flow have proportions that depart somewhat notably from the expected proportion of 0.5. Across the board, bivariate normality seems an appropriate assumption for the expected 50% contours
+As expected, the bivariate normality checks involving gas flow have proportions that depart somewhat notably from the expected proportion of 0.5. Across the board, bivariate normality seems an appropriate assumption for the expected 50% contours.
 
 #### Chi-Squared QQ-Plot
 
-We create a chi-squared QQ plot to assess normality aggregate across all four varaibles:
+We create a chi-squared QQ plot to assess normality aggregate across all four varaibles. In these plots, the quadratic statistical distance is calulcated for each variable, sorted, and plotted against theoretical chi-squared quantiles. Like the univariate QQ plots, approximate linearity suggests that the data set as a whole is comprised of normal variables.
 
 ```{r}
 
 ## Create chisquaredqq function for R package :-)
-
-chisquaredqq <- function(data){
-
-    xbar <- matrix(colMeans(data), nrow = length(data[1,]), ncol = 1)
-    S <- cov(data)
-    Sinv <- solve(S)
-    d <- matrix(nrow = length(data[,1]), ncol = 1)
-    for(i in 1:length(data[,1])){
-      d[i,1] = t(t(data[i,])-xbar)%*%Sinv%*%(t(data[i,])-xbar)
-    }
-    d <- sort(d)
-    chivals <- matrix(nrow = length(data[,1]),ncol = 1)
-    for(i in 1: length(data[,1])){
-      chivals[i,1] = qchisq((i-0.5)/length(data[,1]),df=3)
-    }
-    list(TheoQuants = chivals, CompQuants = d)
-}
 
 chiqq <- chisquaredqq(welder)
 
@@ -108,6 +105,8 @@ As mentioned, the normality checks applied (univariateqq, bivariate normal, and 
 
 ### After Suggested Log Transformation
 
+We now apply the suggested transformation to the data.
+
 #### Transforming the Data
 
 Here, we apply the logarithmic transformation to the gas flow variable and perform the same normality checks to assure that the transformation makes the gas flow variable more normal than it was prior.
@@ -119,6 +118,8 @@ head(welder)
 
 
 #### Univariate Checks
+
+We recreate the same univariate QQ plots.
 
 ```{r}
 voltageqq <- MATH4793MOSER::univariateqq(welder$voltage)
@@ -142,6 +143,8 @@ s20x::normcheck(welder$gasflow)
 
 #### Bivariate Checks
 
+Re-calculation of the bivariate normality checks with the transformed gas flow variable.
+
 ```{r}
 MATH4793MOSER::bivariatenormcheck(welder$voltage,welder$current)
 MATH4793MOSER::bivariatenormcheck(welder$voltage,welder$feedspeed)
@@ -153,6 +156,8 @@ MATH4793MOSER::bivariatenormcheck(welder$feedspeed,welder$gasflow)
 
 
 #### Chi-Squared QQ-Plot
+
+We recreate the chi-squared QQ plot with the transformed data.
 
 ```{r}
 chiqq <- chisquaredqq(welder)
@@ -167,88 +172,34 @@ We can see that the logarithmic transformation did bring the gas flow varaible's
 
 ## T Squared Chart
 
+An R function built in the package MATH4793MOSER recreates the T-squared chart from the example. This chart shows the T-squared statistic calculated for each observation and plots it against upper control limits defined by 95% and 99% confidence.
+
 ```{r}
-tsquaredchart <- function(data){
-  obsnum <- 1:length(data[,1])
-  xbar <- as.numeric(matrix(colMeans(data)))
-  S <- cov(data)
-  Sinv <- solve(S)
-  
-  tsquared <- vector()
-  
-  for(i in 1:length(data[,1])){
-    d <- t(as.numeric(matrix(data[i,])) - xbar) %*% Sinv %*% (as.numeric(matrix(data[i,]))-xbar)
-    tsquared <- c(tsquared,d)
-  }
-  
-  use <- matrix(c(obsnum,tsquared), ncol = 2)
-  use <- data.frame(use)
-  
-  g <- ggplot2::ggplot(use, ggplot2::aes(x = X1, y = X2)) + ggplot2::geom_point() + ggplot2::xlab("Observation Number") + 
-    ggplot2::ylab("T-Squared Value") + ggplot2::ggtitle("T-Squared Chart") + ggplot2::geom_hline(ggplot2::aes(yintercept = qchisq(0.95,length(data[1,])))) +          ggplot2::geom_hline(ggplot2::aes(yintercept = qchisq(0.99,length(data[1,])))) + 
-    ggplot2::geom_label(ggplot2::aes(x = 2, y = qchisq(0.95,length(data[1,])), label = "95% Limit")) +
-    ggplot2::geom_label(ggplot2::aes(x = 2, y = qchisq(0.99,length(data[1,])), label = "99% Limit"))
-  
-  list(Plot = g)
-  
-}
-
 tsquaredchart(welder)$Plot
-
-## consider allowing user to define control limits...
-
 ```
 
+Like in the book, we can see no observation is considered an outlier at 99% confidence and only one at 95% confidence.
 
 ## Quality Control Ellipse
 
 Here I recreate figure 5.10 using a function that can generate a generic confidence ellipse for a given confidence level.
 
 ```{r}
-confidenceellipse <- function(x1,x2,alpha){
-  use <- matrix(c(x1,x2), nrow = length(x1), ncol = 2)
-  xbar <- matrix(colMeans(use), nrow = 2, ncol = 1)
-  S <- cov(use)
-  Sinv <- solve(S)
-  chiquant <- qchisq(1-alpha,2)
-  e <- eigen(S)
-  use2 <- data.frame(use)
-  
-  g <- ggplot2::ggplot(use2, ggplot2::aes(x = X1, y = X2)) + ggplot2::geom_point() + ggplot2::ggtitle("Confidence Ellipse") + ggplot2::xlab("First Variable") + ggplot2::ylab("Second Variable")
-    g <- g + ggforce::geom_ellipse(ggplot2::aes(x0 = xbar[1,1], y0 = xbar[2,1], a = (e$values[1]*chiquant)^0.5, b = (e$values[2]*chiquant)^0.5, angle = atan(e$vectors[2,1]/e$vectors[1,1])))
-    list(Plot = g)
-}
-
 fig5.10 <- confidenceellipse(welder$voltage,welder$gasflow,0.01)
 
 fig5.10$Plot
 
 ```
 
+Like in the book, we see an outlier lying outside of the ellipse.
 
 ## Univariate X Bar Charts
 
+A final recreation of the univariate quality control chart for gas flow is created.
+
 ```{r}
-univariatexbarchart <- function(x) {
-  obsnumber <- 1:length(x)
-  use <- data.frame(matrix(c(obsnumber,x), ncol = 2))
-  
-  mean <- mean(x)
-  UCL <- mean(x) + 3 * var(x)^0.5
-  LCL <- mean(x) - 3 * var(x)^0.5
-  
-  g <- ggplot2::ggplot(use, ggplot2::aes(x = X1, y = X2)) + ggplot2::geom_point() + ggplot2::geom_hline(ggplot2::aes(yintercept = mean)) +
-    ggplot2::geom_hline(ggplot2::aes(yintercept = UCL)) + ggplot2::geom_hline(ggplot2::aes(yintercept = LCL)) + ggplot2::geom_path() + 
-    ggplot2::xlab("Observation Number") + ggplot2::ylab("Observation Value") + ggplot2::ggtitle("Univariate Quality Control Chart") + 
-    ggplot2::geom_label(ggplot2::aes(x = 0, y = UCL, label = "UCL")) + ggplot2::geom_label(ggplot2::aes(x = 0, y = mean, label = "Mean")) + 
-    ggplot2::geom_label(ggplot2::aes(x = 0, y = LCL, label = "LCL"))
-  
-  list(Plot = g)
-}
-
-## Consider allowing for user defined CLs of some sort...
-
 univariatexbarchart(welder$gasflow)$Plot
 ```
 
+This chart suggests that there is indeed an outlier observation as there is one where the gas flow variable is 3 standard deviations greater than the mean. The aggregate of these three plots suggests that that observation should be considered an outlier and would not be detected by the T-squared investigation alone.
 

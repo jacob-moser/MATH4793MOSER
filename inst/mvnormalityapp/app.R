@@ -1,8 +1,4 @@
 
-library(shiny)
-library(ggplot2)
-
-
 ui <- fluidPage(
 
   titlePanel("Interactive Mulitvariate Normality App"),
@@ -78,8 +74,8 @@ server <- function(input, output) {
 
     use <- data.frame(matrix(c(a,b,d), nrow = length(a), ncol = 3))
 
-    g <- ggplot(use, mapping = aes(x = X2, y = as.numeric(as.character(X1)))) + geom_violin() + geom_point(aes(color = X3)) +
-      xlab("Variable") + ylab("Value")
+    g <- ggplot2::ggplot(use, mapping = ggplot2::aes(x = X2, y = as.numeric(as.character(X1)))) + ggplot2::geom_violin() + ggplot2::geom_point(aes(color = X3)) +
+      ggplot2::xlab("Variable") + ggplot2::ylab("Value")
     g
   })
 
@@ -159,13 +155,10 @@ server <- function(input, output) {
     use2$X1 <- as.numeric(as.character(use2$X1))
     use2$X2 <- as.numeric(as.character(use2$X2))
 
-    library(ggplot2)
-    library(ggforce)
-
     e <- eigen(S)
 
-    g <- ggplot(use2, aes(x = X1, y = X2)) + geom_point() + ggtitle("Confidence Ellipse") + xlab("First Variable") + ylab("Second Variable")
-    g <- g + geom_ellipse(aes(x0 = xbar[1,1], y0 = xbar[2,1], a = (e$values[1]*chiquant)^0.5, b = (e$values[2]*chiquant)^0.5, angle = atan(e$vectors[2,1]/e$vectors[1,1])))
+    g <- ggplot2::ggplot(use2, ggplot2::aes(x = X1, y = X2)) + ggplot2::geom_point() + ggplot2::ggtitle("Confidence Ellipse") + ggplot2::xlab("First Variable") + ggplot2::ylab("Second Variable")
+    g <- g + ggforce::geom_ellipse(ggplot2::aes(x0 = xbar[1,1], y0 = xbar[2,1], a = (e$values[1]*chiquant)^0.5, b = (e$values[2]*chiquant)^0.5, angle = atan(e$vectors[2,1]/e$vectors[1,1])))
     g
   })
 

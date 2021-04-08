@@ -6,6 +6,11 @@
 \usage{
 bivariatenormcheck(x1, x2)
 }
+\arguments{
+\item{x1}{first data vector to conduct the check on}
+
+\item{x2}{second data vector to conduct the check on}
+}
 \value{
 Text output describing result of the test
 }

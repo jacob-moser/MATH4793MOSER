@@ -4,6 +4,9 @@
 #'
 #' @details User inputs a bivariate dataset, estimate for the mu vector, and alpha value corresponding to the desired confidence level and gets the outcome of the test, information about the data provided, and a plot of the confidence ellipse
 #'
+#' @param data the data set to conduct the test on
+#' @param mu the estimated mean vector
+#' @param alpha the confidence level for the T test
 #'
 #' @return List output of calculations from Hotelling's T Test and a plot of the confidence ellipse plot
 #' @section List of outputs includes:
