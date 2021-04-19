@@ -1,0 +1,51 @@
+---
+title: "PCA_Boot"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{PCA_Boot}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 6
+)
+```
+
+```{r setup}
+library(MATH4793MOSER)
+```
+
+## Demonstration of pcabootAG Function
+
+In this vignette, an exmaple of the function pcabootAG being run on transformed data is shown below.
+
+First, we take the log transformation of the data and take only the male turtles:
+
+```{r}
+turt <- MATH4793MOSER::turtle
+
+df <- dplyr::filter(turt, sex  == "male")
+df$length <- log(df$length)
+df$width <- log(df$width)
+df$height <- log(df$height)
+df <- df[,-4]
+head(df)
+```
+
+Next, we use the pcabootAG function to create confidence intervals and plots for the principal components:
+
+```{r}
+MATH4793MOSER::pcabootAG(data = df, cov = FALSE)
+```
+
+As documeted in the function the following output is produced.
+1) Histograms for the bootstrap estimates of the eigenvalues
+2) Boxplots showing the distribution of the estimates for the components of the first two principal components
+3) Bootstrap confidence intervals for each eigenvalue.
+4) Bootstrap cofidence intervals for each component of each eigenvector or principal component
+5) Additional confidence intervals for the eigenvalues based off of the results from Anderson and Girshick
