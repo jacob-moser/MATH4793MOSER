@@ -1,0 +1,75 @@
+---
+title: "project2"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{project2}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 6
+)
+```
+
+```{r setup}
+library(MATH4793MOSER)
+```
+
+## Introduction
+
+This project uses two functions created in my R package to answer question 8.10 from the textbook. The two functions that I created for this project are titled principalcomponents() and bonfcisvariance()
+
+Below are responses to the assigned questions.
+
+### Part A
+
+This part asks for the sample covariance matrix $\textbf S$ and the sample principal components. These can both be computed from the output of principalcomponents(). Note I have incorporated the stock data into my package and use that to load it here.
+
+```{r}
+stock <- MATH4793MOSER::stocks
+out <- principalcomponents(stock)
+
+out$S
+out$PrincipalComponents
+```
+
+The full output of the function is shown below:
+
+```{r}
+principalcomponents(stock)
+```
+
+
+### Part B
+
+The next part of the questions asks for the proportion sample variance explained by the first three principal components. This is each associated eigenvalue divided by the total variance, the sum of the eigenvalues.
+
+```{r}
+## Variance explained by individual principal component
+
+out$Eigenvalues[1]/sum(out$Eigenvalues)
+out$Eigenvalues[2]/sum(out$Eigenvalues)
+out$Eigenvalues[3]/sum(out$Eigenvalues)
+
+## Cumulative variance explained by the first three principal components
+
+sum(out$Eigenvalues[1:3])/sum(out$Eigenvalues)
+```
+
+### Part C
+
+Next, I use the function in my package bonfcisvariance() to calculate simultaneous Bonferroni 90% confidence intervals for the first three principal components.
+
+```{r}
+bonfcisvariance(stock, q = 3, alpha = 0.1)
+```
+
+### Part D
+
+I do believe that the stocks rate of returns can be summarized in fewer than 5 dimensions. As shown in part b, the first three principal components explain about 0.9 of the total sample variance. Thus, these three components can summarize the data effectively. One limitation of this analysis is that it was performed on the sample covariance matrix. I would also investigate the pricnipal components based on standardized values as they may be distinct from those caluclated from the sample covariance matrix.
